@@ -28,8 +28,18 @@
  *      .catch((error) => console.log(error.message)) // 'Error: Wrong parameter is passed!
  *                                                    //  Ask her again.';
  */
-function willYouMarryMe(/* isPositiveAnswer */) {
-  throw new Error('Not implemented');
+function willYouMarryMe(isPositiveAnswer) {
+  return new Promise((resolve, reject) => {
+    const falseAnswer = 'Oh no, she said "No".';
+    const trueAnswer = 'Hooray!!! She said "Yes"!';
+    const error = new Error('Wrong parameter is passed! Ask her again.');
+    const answer = isPositiveAnswer ? trueAnswer : falseAnswer;
+    if (typeof isPositiveAnswer === 'boolean') {
+      resolve(answer);
+    } else {
+      reject(error);
+    }
+  });
 }
 
 
@@ -48,8 +58,12 @@ function willYouMarryMe(/* isPositiveAnswer */) {
  *    })
  *
  */
-function processAllPromises(/* array */) {
-  throw new Error('Not implemented');
+function processAllPromises(array) {
+  return new Promise((resolve, reject) => {
+    const answer = [];
+    array.map((i) => i.then((element) => answer.push(element)).catch((error) => reject(error)));
+    resolve(answer);
+  });
 }
 
 /**
@@ -71,8 +85,8 @@ function processAllPromises(/* array */) {
  *    })
  *
  */
-function getFastestPromise(/* array */) {
-  throw new Error('Not implemented');
+function getFastestPromise(array) {
+  return Promise.race(array);
 }
 
 /**
@@ -92,8 +106,33 @@ function getFastestPromise(/* array */) {
  *    });
  *
  */
-function chainPromises(/* array, action */) {
-  throw new Error('Not implemented');
+function chainPromises(array, action) {
+  const result = {
+    positive: [],
+    errors: [],
+  };
+
+  const toPositive = (answer) => {
+    result.positive.push(answer);
+  };
+
+  const toErrors = () => {
+    result.errors.push(new Error('This is error'));
+  };
+
+  const promise = (element) => {
+    element.then(toPositive).catch(toErrors);
+  };
+
+  const expectation = async () => {
+    await array.forEach(promise);
+    return result.positive.reduce(action);
+  };
+
+  return new Promise((resolve, reject) => {
+    resolve(expectation());
+    reject(result.errors);
+  });
 }
 
 module.exports = {
